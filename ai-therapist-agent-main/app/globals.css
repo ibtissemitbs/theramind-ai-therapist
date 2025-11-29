@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ===== MODE CLAIR - Soft Natural avec plus de couleur ===== */
+    
+    /* Fond principal : beige/sable chaud avec saturation accrue */
+    --background: 35 28% 92%;
+    --foreground: 25 20% 20%;
+
+    /* Cartes : crème légèrement coloré pour contraste doux */
+    --card: 30 35% 96%;
+    --card-foreground: 25 20% 20%;
+
+    --popover: 30 35% 96%;
+    --popover-foreground: 25 20% 20%;
+
+    /* Primaire : vert sauge plus saturé (#6B9F76) */
+    --primary: 130 28% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondaire : beige/pêche doux */
+    --secondary: 25 35% 88%;
+    --secondary-foreground: 25 25% 25%;
+
+    /* Neutres colorés */
+    --muted: 30 25% 90%;
+    --muted-foreground: 25 15% 40%;
+
+    /* Accent : terracotta plus présent */
+    --accent: 15 40% 70%;
+    --accent-foreground: 25 25% 20%;
+
+    /* États / bordures */
+    --destructive: 0 65% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 22% 84%;
+    --input: 30 25% 87%;
+    --ring: 130 35% 55%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* ===== MODE SOMBRE - Vert Pastel Foncé Apaisant ===== */
+
+    /* Fond général : vert forêt sombre avec nuance bleutée (#1a2e26) */
+    --background: 158 30% 13%;
+    --foreground: 145 35% 88%;
+
+    /* Cartes : vert sapin élégant */
+    --card: 158 28% 18%;
+    --card-foreground: 145 35% 88%;
+
+    /* Popover */
+    --popover: 158 28% 18%;
+    --popover-foreground: 145 35% 88%;
+
+    /* Primaire : vert menthe pastel lumineux (#88d4ab) */
+    --primary: 148 45% 68%;
+    --primary-foreground: 158 30% 13%;
+
+    /* Secondaire : vert olive foncé */
+    --secondary: 155 20% 23%;
+    --secondary-foreground: 145 30% 85%;
+
+    /* Muted : vert grisé doux */
+    --muted: 155 15% 20%;
+    --muted-foreground: 145 18% 62%;
+
+    /* Accent : jade pastel (#69c9a0) */
+    --accent: 155 38% 60%;
+    --accent-foreground: 158 30% 13%;
+
+    /* Destructive */
+    --destructive: 0 60% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Bordures et inputs */
+    --border: 155 18% 25%;
+    --input: 155 18% 25%;
+    --ring: 148 50% 65%;
+  }
+
+/* Add subtle transitions */
+@layer base {
+  * {
+    @apply border-border transition-colors duration-200;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    position: relative;
+  }
+  
+  /* Mode clair : fond riche avec dégradés et texture */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background-color: hsl(35, 28%, 92%);
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(107, 159, 118, 0.15) 0%, transparent 45%),
+      radial-gradient(circle at 75% 75%, rgba(235, 180, 160, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 50% 0%, rgba(145, 195, 175, 0.1) 0%, transparent 35%),
+      radial-gradient(circle at 0% 100%, rgba(240, 210, 180, 0.13) 0%, transparent 35%),
+      radial-gradient(circle at 100% 50%, rgba(180, 150, 120, 0.08) 0%, transparent 40%),
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 50px,
+        rgba(107, 159, 118, 0.04) 50px,
+        rgba(107, 159, 118, 0.04) 100px
+      );
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100px 100px;
+  }
+  
+  /* Mode sombre : fond avec texture organique */
+  .dark body::before {
+    background: 
+      radial-gradient(circle at 20% 20%, hsl(158, 35%, 16%) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, hsl(148, 30%, 15%) 0%, transparent 40%),
+      radial-gradient(circle at 50% 100%, hsl(155, 25%, 14%) 0%, transparent 60%),
+      hsl(158, 30%, 13%);
+  }
+}
+
+/* Add some calming animations */
+.hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1;
+}
+
+.gentle-shadow {
+  @apply shadow-lg shadow-primary/5;
+}
+
+/* Add after your existing styles */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes scroll {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+}
+
+.animate-scroll {
+  animation: scroll 2s ease-in-out infinite;
+}
+
+/* Gradient animations */
+.gradient-animation {
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Add to your existing animations */
+@keyframes pulse-gentle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+@layer utilities {
+  .bg-size-200 {
+    background-size: 200% 100%;
+  }
+
+  .bg-pos-0 {
+    background-position: 0% 0%;
+  }
+
+  .bg-pos-100 {
+    background-position: 100% 0%;
+  }
+
+  .hover-lift {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-8px);
+  }
+
+  .gentle-shadow {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .gentle-shadow:hover {
+    box-shadow: 0 8px 30px -2px rgba(0, 0, 0, 0.15);
+  }
+}
+}

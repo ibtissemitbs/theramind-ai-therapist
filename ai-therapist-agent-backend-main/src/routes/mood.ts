@@ -1,0 +1,16 @@
+import express from "express";
+import { auth } from "../middleware/auth";
+import { createMood, getMoods } from "../controllers/moodController";
+
+const router = express.Router();
+
+// All routes are protected with authentication
+router.use(auth);
+
+// Track a new mood entry
+router.post("/", createMood);
+
+// Get all mood entries
+router.get("/", getMoods);
+
+export default router;

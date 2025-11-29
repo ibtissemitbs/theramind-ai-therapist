@@ -1,0 +1,90 @@
+// 🚨 INSTRUCTIONS POUR AJOUTER L'ALERTE DE CRISE
+//
+// ÉTAPE 1 : Ouvrez le fichier page.tsx (app/therapy/[sessionId]/page.tsx)
+//
+// ÉTAPE 2 : Cherchez cette ligne (ligne ~982) :
+//
+//     </div>
+//   </div>
+//
+//   {/* Écran d'accueil si pas de messages */}
+//   {messages.length === 0 ? (
+//
+// ÉTAPE 3 : AJOUTEZ CE CODE ENTRE LES DEUX (juste après </div></div> et avant {/* Écran... */) :
+
+          {/* 🚨 ALERTE DE CRISE */}
+          {crisisDetected && crisisDetected.level !== 'none' && (
+            <motion.div
+              id="crisis-alert"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={cn(
+                "mx-4 mt-4 p-6 rounded-lg border-2",
+                crisisDetected.level === 'critical' && "bg-red-500/10 border-red-500",
+                crisisDetected.level === 'high' && "bg-orange-500/10 border-orange-500",
+                crisisDetected.level === 'medium' && "bg-yellow-500/10 border-yellow-500",
+                crisisDetected.level === 'low' && "bg-blue-500/10 border-blue-500"
+              )}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+                    {crisisDetected.level === 'critical' && '🚨'}
+                    {crisisDetected.level === 'high' && '🛑'}
+                    {crisisDetected.level === 'medium' && '🔔'}
+                    {crisisDetected.level === 'low' && '💙'}
+                    {crisisDetected.message}
+                  </h3>
+                  
+                  {crisisDetected.resources.length > 0 && (
+                    <div className="space-y-3 mt-4">
+                      {crisisDetected.resources.map((resource, idx) => (
+                        <div key={idx} className="bg-background/50 p-3 rounded border">
+                          <div className="font-semibold">{resource.title}</div>
+                          {resource.phone && (
+                            <a 
+                              href={`tel:${resource.phone}`}
+                              className="text-primary font-bold text-lg block mt-1 hover:underline"
+                            >
+                              📞 {resource.phone}
+                            </a>
+                          )}
+                          {resource.link && (
+                            <a 
+                              href={resource.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline block mt-1"
+                            >
+                              🔗 {resource.link}
+                            </a>
+                          )}
+                          <p className="text-sm text-muted-foreground mt-1">{resource.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {crisisDetected.level === 'critical' && (
+                    <div className="mt-4 p-3 bg-red-500/20 rounded border border-red-500">
+                      <p className="font-semibold text-sm">
+                        ⚠️ Si vous êtes en danger immédiat, appelez le 15 (SAMU) ou le 112 (urgences européennes) maintenant.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => setCrisisDetected(null)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+// ÉTAPE 4 : Sauvegardez le fichier
+// ÉTAPE 5 : Rechargez votre application dans le navigateur
+// ÉTAPE 6 : Tapez "Je suis stressé" et vous verrez l'alerte bleue apparaître ! 💙
