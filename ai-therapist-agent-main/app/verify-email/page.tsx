@@ -43,24 +43,13 @@ export default function VerifyEmailPage() {
 
       if (response.ok) {
         setStatus("success");
-        setMessage(data.message || "Email vérifié avec succès !");
+        setMessage(data.message || "Email vérifié avec succès ! Vous pouvez maintenant vous connecter.");
         
-        // Si on reçoit un token, sauvegarder et rediriger vers dashboard
-        if (data.token && data.authenticated) {
-          console.log("[VERIFY] ✅ Token reçu, connexion automatique...");
-          localStorage.setItem("token", data.token);
-          // Redirection immédiate vers dashboard
-          setTimeout(() => {
-            console.log("[VERIFY] Redirection vers dashboard...");
-            window.location.href = "/dashboard";
-          }, 1500);
-        } else {
-          console.log("[VERIFY] ⚠️ Pas de token, redirection vers login");
-          // Sinon rediriger vers login
-          setTimeout(() => {
-            router.push("/login?verified=true");
-          }, 3000);
-        }
+        // Toujours rediriger vers login pour configurer 2FA
+        console.log("[VERIFY] ✅ Email vérifié, redirection vers login...");
+        setTimeout(() => {
+          router.push("/login?verified=true");
+        }, 2500);
       } else {
         console.error("[VERIFY] ❌ Erreur HTTP:", response.status, data);
         if (data.expired) {
@@ -182,13 +171,13 @@ export default function VerifyEmailPage() {
                     className="text-center"
                   >
                     <p className="text-sm text-muted-foreground mb-4">
-                      Redirection vers le tableau de bord...
+                      🔄 Redirection vers la page de connexion...
                     </p>
                     <Button 
-                      onClick={() => router.push("/dashboard")}
+                      onClick={() => router.push("/login?verified=true")}
                       className="w-full"
                     >
-                      Aller au tableau de bord
+                      Aller à la page de connexion
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </motion.div>

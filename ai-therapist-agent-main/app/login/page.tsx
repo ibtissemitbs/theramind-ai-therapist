@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginUser } from "@/lib/api/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,11 +13,20 @@ import { useSession } from "@/lib/contexts/session-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { checkSession } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Vérifier si l'utilisateur vient de vérifier son email
+  useEffect(() => {
+    if (searchParams.get("verified") === "true") {
+      setSuccessMessage("✅ Email vérifié avec succès ! Vous pouvez maintenant vous connecter.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,9 +37,9 @@ export default function LoginPage() {
       
       // Vérifier si une vérification email est requise
       if (response.requiresEmailVerification) {
-        setError("⚠️ Votre email n'est pas encore vérifié. Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification.");
         // Sauvegarder l'email pour un éventuel renvoi
         localStorage.setItem("pendingVerificationEmail", email);
+        setError("EMAIL_NOT_VERIFIED");
       } else if (response.requiresQRVerification) {
         // Première configuration TOTP - Rediriger vers la page de vérification QR avec le QR code
         const params = new URLSearchParams({
@@ -50,7 +59,11 @@ export default function LoginPage() {
         router.push(`/qr-verification?${params.toString()}`);
       } else {
         // Connexion normale avec token
+        // Nettoyer localStorage avant de définir le nouveau token
+        const oldToken = localStorage.getItem("token");
+        localStorage.clear();
         localStorage.setItem("token", response.token);
+        
         await checkSession();
         await new Promise((resolve) => setTimeout(resolve, 100));
         router.push("/dashboard");
@@ -126,12 +139,44 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* Message de succès */}
+            {successMessage && (
+              <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 rounded-xl p-4">
+                <p className="text-green-700 dark:text-green-300 text-sm text-center font-semibold">
+                  {successMessage}
+                </p>
+              </div>
+            )}
+
             {/* Erreur */}
-            {error && (
+            {error && error === "EMAIL_NOT_VERIFIED" ? (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-700 rounded-xl p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div className="flex-1">
+                    <p className="text-yellow-800 dark:text-yellow-200 font-semibold text-sm mb-1">
+                      Email non vérifié
+                    </p>
+                    <p className="text-yellow-700 dark:text-yellow-300 text-xs">
+                      Vous devez vérifier votre email avant de pouvoir vous connecter. 
+                      Vérifiez votre boîte de réception et cliquez sur le lien de vérification.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-center pt-2 border-t border-yellow-300 dark:border-yellow-700">
+                  <Link
+                    href="/resend-verification"
+                    className="text-yellow-800 dark:text-yellow-200 text-sm font-semibold hover:text-yellow-900 dark:hover:text-yellow-100 underline transition-colors inline-flex items-center gap-1"
+                  >
+                    📧 Renvoyer l'email de vérification
+                  </Link>
+                </div>
+              </div>
+            ) : error ? (
               <p className="text-destructive text-sm text-center font-medium">
                 {error}
               </p>
-            )}
+            ) : null}
 
             {/* Bouton */}
             <Button

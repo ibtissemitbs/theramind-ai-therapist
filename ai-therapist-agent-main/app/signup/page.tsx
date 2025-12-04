@@ -16,6 +16,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [gender, setGender] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -28,9 +30,17 @@ export default function SignupPage() {
       setError("Les mots de passe ne correspondent pas.");
       return;
     }
+    if (!gender) {
+      setError("Veuillez sélectionner votre genre.");
+      return;
+    }
+    if (!acceptedTerms) {
+      setError("Vous devez accepter les conditions d'utilisation.");
+      return;
+    }
     setLoading(true);
     try {
-      const response = await registerUser(name, email, password);
+      const response = await registerUser(name, email, password, gender);
       
       // Inscription réussie, afficher message de vérification email
       setSuccess(true);
@@ -138,6 +148,61 @@ export default function SignupPage() {
                   />
                 </div>
               </div>
+              
+              {/* Genre */}
+              <div>
+                <label className="block text-base font-semibold mb-2">
+                  Genre
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={gender === "male"}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-primary focus:ring-primary"
+                      required
+                    />
+                    <span className="text-base">Homme</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={gender === "female"}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-4 h-4 text-primary focus:ring-primary"
+                      required
+                    />
+                    <span className="text-base">Femme</span>
+                  </label>
+                </div>
+              </div>
+              
+              {/* Conditions d'utilisation */}
+              <div className="flex items-start space-x-2">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-primary focus:ring-primary rounded"
+                  required
+                />
+                <label htmlFor="terms" className="text-sm text-muted-foreground">
+                  J'accepte les{" "}
+                  <Link href="/terms" className="text-primary font-semibold underline hover:text-primary/80">
+                    conditions d'utilisation
+                  </Link>
+                  {" "}et la{" "}
+                  <Link href="/privacy" className="text-primary font-semibold underline hover:text-primary/80">
+                    politique de confidentialité
+                  </Link>
+                </label>
+              </div>
             </div>
             {error && (
               <p className="text-red-500 text-base text-center font-medium">
@@ -146,16 +211,41 @@ export default function SignupPage() {
             )}
             
             {success && verificationSent && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-center space-y-2">
-                <p className="text-blue-700 dark:text-blue-300 font-semibold text-lg">
-                  ✅ Inscription réussie !
-                </p>
-                <p className="text-sm text-blue-600 dark:text-blue-400">
-                  📧 Un email de vérification a été envoyé à <strong>{email}</strong>
-                </p>
-                <p className="text-xs text-blue-500 dark:text-blue-400 mt-2">
-                  Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification pour activer votre compte.
-                </p>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-2xl p-6 space-y-4 shadow-lg">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500 dark:bg-blue-600 rounded-full mb-3">
+                    <span className="text-3xl">✅</span>
+                  </div>
+                  <h3 className="text-blue-800 dark:text-blue-200 font-bold text-xl mb-2">
+                    Inscription réussie !
+                  </h3>
+                </div>
+                
+                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                  <p className="text-blue-700 dark:text-blue-300 font-semibold text-center mb-2">
+                    📧 Email de vérification envoyé
+                  </p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400 text-center">
+                    Envoyé à : <strong className="break-all">{email}</strong>
+                  </p>
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                  <p className="text-blue-700 dark:text-blue-300 font-medium">
+                    📌 Prochaines étapes :
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-blue-600 dark:text-blue-400 pl-2">
+                    <li>Vérifiez votre boîte de réception (et le dossier spam)</li>
+                    <li>Cliquez sur le lien de vérification dans l'email</li>
+                    <li>Revenez ici et connectez-vous</li>
+                  </ol>
+                </div>
+                
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-3">
+                  <p className="text-xs text-yellow-800 dark:text-yellow-300 text-center">
+                    ⚠️ <strong>Important :</strong> Vous devez vérifier votre email avant de pouvoir vous connecter
+                  </p>
+                </div>
               </div>
             )}
             

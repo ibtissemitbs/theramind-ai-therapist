@@ -503,18 +503,39 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-2"
+            className="flex items-center gap-4"
           >
-            <h1 className="text-3xl font-bold text-foreground">
-              Bonjour, {user?.name || user?.email?.split('@')[0] || "utilisateur"}
-            </h1>
-            <p className="text-muted-foreground">
-              {currentTime.toLocaleDateString("fr-FR", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
+            {/* Avatar de profil */}
+            {user && (
+              <div className="relative">
+                {user.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.name || "User"}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-primary"
+                    key={user.profileImage}
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary">
+                    <span className="text-2xl font-bold text-primary">
+                      {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || "U"}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-foreground">
+                Bonjour, {user?.name || user?.email?.split('@')[0] || "utilisateur"}
+              </h1>
+              <p className="text-muted-foreground">
+                {currentTime.toLocaleDateString("fr-FR", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
           </motion.div>
           <div className="flex items-center gap-4">
             <Notifications userId="default-user" />

@@ -7,6 +7,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
+  profileImage?: string;
 }
 
 interface SessionContextType {
@@ -38,11 +39,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      console.log("SessionContext: Fetching user data...");
-      const response = await fetch("/api/auth/me", {
+      console.log("SessionContext: Fetching user data with timestamp", Date.now());
+      // Force cache-busting avec timestamp unique + random pour être sûr
+      const cacheBuster = `${Date.now()}_${Math.random()}`;
+      const response = await fetch(`/api/auth/me?t=${cacheBuster}`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
         },
+        cache: 'no-store',
       });
 
       console.log("SessionContext: Response status:", response.status);
@@ -52,17 +58,39 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         console.log("SessionContext: User data received:", data);
         const userData = data.user;
         const { password, ...safeUserData } = userData;
+        
+        console.log("SessionContext: safeUserData profileImage:", safeUserData.profileImage ? `${safeUserData.profileImage.substring(0, 50)}...` : "null");
+        
+        // Vérifier si c'est un nouvel utilisateur ou si l'utilisateur a changé
+        const lastUserId = localStorage.getItem("lastUserId");
+        if (lastUserId && lastUserId !== safeUserData._id) {
+          console.log("SessionContext: Different user detected, clearing localStorage");
+          // Nettoyer toutes les données de l'ancien utilisateur
+          const token = localStorage.getItem("token");
+          localStorage.clear();
+          // Remettre le token
+          if (token) localStorage.setItem("token", token);
+        }
+        
+        // Sauvegarder l'ID de l'utilisateur actuel
+        localStorage.setItem("lastUserId", safeUserData._id);
+        
+        // TOUJOURS mettre à jour l'utilisateur avec les nouvelles données
+        console.log("SessionContext: Updating user state with fresh data");
+        console.log("SessionContext: Before setUser, current user:", user);
         setUser(safeUserData);
-        console.log("SessionContext: User state updated:", safeUserData);
+        console.log("SessionContext: After setUser called with:", safeUserData);
       } else {
         console.log("SessionContext: Failed to get user data");
         setUser(null);
         localStorage.removeItem("token");
+        localStorage.removeItem("lastUserId");
       }
     } catch (error) {
       console.error("SessionContext: Error checking session:", error);
       setUser(null);
       localStorage.removeItem("token");
+      localStorage.removeItem("lastUserId");
     } finally {
       setLoading(false);
     }
@@ -82,7 +110,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem("token");
+      // Nettoyer TOUTES les données localStorage à la déconnexion
+      console.log("SessionContext: Clearing all localStorage data on logout");
+      localStorage.clear();
       setUser(null);
       router.push("/");
     }

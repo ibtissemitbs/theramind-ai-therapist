@@ -477,7 +477,6 @@ export default function TherapyPage() {
         // Charger depuis localStorage en priorité
         const localSessions = loadAllSessionsFromLocal();
         if (localSessions.length > 0) {
-          console.log("📦 Sessions chargées depuis localStorage:", localSessions.length);
           setSessions(localSessions);
         }
         
@@ -985,7 +984,15 @@ export default function TherapyPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <MessageSquare className="w-4 h-4" />
                     <span className="font-medium flex-1">
-                      {s.messages[0]?.content.slice(0, 30) || "Nouveau chat"}
+                      {(() => {
+                        const firstUserMsg = s.messages.find(m => m.role === 'user');
+                        let content = firstUserMsg?.content || "Nouveau chat";
+                        // Si le contenu ressemble à un ID (plus de 30 caractères sans espaces), afficher "Session sans titre"
+                        if (content.length > 30 && !content.includes(' ')) {
+                          content = "Session sans titre";
+                        }
+                        return content.length > 50 ? content.slice(0, 47) + "..." : content;
+                      })()}
                     </span>
                     <Button
                       variant="ghost"
@@ -1392,10 +1399,6 @@ export default function TherapyPage() {
                     "group-hover:scale-105 group-focus-within:scale-105"
                   )}
                   disabled={isTyping || isChatPaused || (!message.trim() && !audioBlob && !attachedImage)}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSubmit(e);
-                  }}
                 >
                   <Send className="w-4 h-4" />
                 </Button>

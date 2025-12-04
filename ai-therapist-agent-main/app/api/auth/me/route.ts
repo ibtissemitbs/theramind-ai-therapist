@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const API_URL =
-    process.env.BACKEND_API_URL ||
-    "https://ai-therapist-agent-backend.onrender.com";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
   const token = req.headers.get("Authorization");
 
   if (!token) {
@@ -15,6 +14,7 @@ export async function GET(req: NextRequest) {
       headers: {
         Authorization: token,
       },
+      cache: 'no-store', // Désactiver le cache Next.js
     });
 
     if (!res.ok) {
@@ -25,7 +25,15 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json();
-    return NextResponse.json(data);
+    
+    // Retourner avec des headers pour désactiver le cache navigateur
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { message: "Server error", error },

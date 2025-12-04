@@ -48,7 +48,8 @@ export default function QRVerificationPage() {
       if (response.ok) {
         setVerified(true);
         
-        // Sauvegarder le token
+        // Nettoyer localStorage avant de définir le nouveau token
+        localStorage.clear();
         localStorage.setItem("token", data.token);
         console.log("[QR-VERIFICATION] Token sauvegardé:", data.token.substring(0, 20) + "...");
         

@@ -7,20 +7,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Mail } from "lucide-react";
+import { forgotPassword } from "@/lib/api/auth";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: Call backend to send reset email
-    setTimeout(() => {
+    setError("");
+    
+    try {
+      await forgotPassword(email);
       setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || "Une erreur s'est produite");
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -29,19 +36,19 @@ export default function ForgotPasswordPage() {
         <Card className="w-full md:w-5/12 max-w-2xl p-8 md:p-10 rounded-3xl shadow-2xl border border-primary/10 bg-card/90 backdrop-blur-lg mt-20">
           <div className="mb-6 text-center">
             <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-1 tracking-tight">
-              Forgot Password
+              Mot de passe oublié
             </h1>
             <p className="text-base text-muted-foreground font-medium">
-              Enter your email to receive a password reset link.
+              Entrez votre email pour recevoir un lien de réinitialisation.
             </p>
           </div>
           {submitted ? (
             <div className="text-center py-8">
               <p className="text-lg text-primary font-semibold mb-2">
-                Check your email!
+                Vérifiez votre email! 📧
               </p>
               <p className="text-muted-foreground">
-                If an account exists, a reset link has been sent.
+                Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.
               </p>
             </div>
           ) : (
@@ -49,7 +56,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-base font-semibold mb-1"
+                  className="block text-base font-semibold mb-1 text-green-700 dark:text-green-600"
                 >
                   Email
                 </label>
@@ -58,32 +65,37 @@ export default function ForgotPasswordPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
-                    className="pl-12 py-2 text-base rounded-xl bg-card bg-opacity-80 border border-primary focus:outline-none focus:ring-2 focus:ring-primary text-white placeholder:text-muted-foreground"
+                    placeholder="Entrez votre email"
+                    className="pl-12 py-2 text-base rounded-xl bg-card bg-opacity-80 border border-primary focus:outline-none focus:ring-2 focus:ring-primary text-green-700 dark:text-green-600 placeholder:text-muted-foreground"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
               </div>
+              {error && (
+                <p className="text-red-500 text-base text-center font-medium">
+                  {error}
+                </p>
+              )}
               <Button
                 className="w-full py-2 text-base rounded-xl font-bold bg-gradient-to-r from-primary to-primary/80 shadow-md hover:from-primary/80 hover:to-primary"
                 size="lg"
                 type="submit"
                 disabled={loading}
               >
-                {loading ? "Sending..." : "Send Reset Link"}
+                {loading ? "Envoi en cours..." : "Envoyer le lien"}
               </Button>
             </form>
           )}
           <div className="my-6 border-t border-primary/10" />
           <p className="text-base text-center text-muted-foreground">
-            Remembered your password?{" "}
+            Vous vous souvenez de votre mot de passe ?{" "}
             <Link
               href="/login"
               className="text-primary font-semibold underline hover:text-primary/80 transition-colors"
             >
-              Sign in
+              Se connecter
             </Link>
           </p>
         </Card>

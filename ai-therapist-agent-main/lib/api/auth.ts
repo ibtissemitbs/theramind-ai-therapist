@@ -1,12 +1,13 @@
 export async function registerUser(
   name: string,
   email: string,
-  password: string
+  password: string,
+  gender?: string
 ) {
   const res = await fetch("/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password, gender }),
   });
   if (!res.ok) {
     const error = await res.json();
@@ -24,6 +25,32 @@ export async function loginUser(email: string, password: string) {
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.message || "Login failed");
+  }
+  return res.json();
+}
+
+export async function forgotPassword(email: string) {
+  const res = await fetch("/api/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Failed to send reset email");
+  }
+  return res.json();
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  const res = await fetch("/api/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Failed to reset password");
   }
   return res.json();
 }
