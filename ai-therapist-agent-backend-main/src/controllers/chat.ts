@@ -9,9 +9,10 @@ import { InngestSessionResponse, InngestEvent } from "../types/inngest";
 import { Types } from "mongoose";
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY || "AIzaSyCIPI4PLmI4te8v7n_o4-alwFinobGEopU"
-);
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY is not set in environment variables");
+}
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Create a new chat session
 export const createChatSession = async (req: Request, res: Response) => {
@@ -271,8 +272,11 @@ export const getChatHistory = async (req: Request, res: Response) => {
       }
     }
 
+    // Convertir en objet pour appliquer les getters et déchiffrer les messages
+    const sessionObj = session.toObject();
+    
     // Récupérer tous les messages depuis ChatSession
-    const messages = session.messages.sort((a, b) => 
+    const messages = sessionObj.messages.sort((a, b) => 
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
@@ -281,5 +285,46 @@ export const getChatHistory = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error("Error fetching chat history:", error);
     res.status(500).json({ message: "Error fetching chat history" });
+  }
+};
+
+// Get all chat sessions for the authenticated user
+export const getAllChatSessions = async (req: Request, res: Response) => {
+  try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    const userId = new Types.ObjectId(req.user.id);
+    
+    // Find all sessions for this user
+    const sessions = await ChatSession.find({ userId })
+      .sort({ startTime: -1 }) // Most recent first
+      .exec();
+
+    logger.info(`✅ Retrieved ${sessions.length} chat sessions for user: ${userId}`);
+
+    // Format the response to match frontend expectations
+    const formattedSessions = sessions.map(session => {
+      // Convertir en objet JSON pour appliquer les getters et déchiffrer les messages
+      const sessionObj = session.toObject();
+      return {
+        sessionId: sessionObj.sessionId,
+        messages: sessionObj.messages,
+        createdAt: sessionObj.startTime,
+        updatedAt: sessionObj.messages.length > 0 
+          ? sessionObj.messages[sessionObj.messages.length - 1].timestamp 
+          : sessionObj.startTime,
+      };
+    });
+
+    res.json(formattedSessions);
+  } catch (error) {
+    logger.error("Error fetching all chat sessions:", error);
+    res.status(500).json({ 
+      message: "Error fetching chat sessions",
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
   }
 };

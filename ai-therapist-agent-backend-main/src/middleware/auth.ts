@@ -30,6 +30,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     req.user = user;
+    (req as any).userId = decoded.userId; // Pour compatibilité avec les contrôleurs existants
     next();
   } catch (error) {
     res.status(401).json({ message: "Invalid authentication token" });

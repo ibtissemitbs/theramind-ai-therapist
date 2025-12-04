@@ -49,37 +49,18 @@ export const verifyEmail = async (req: Request, res: Response) => {
     user.emailVerified = new Date();
     await user.save();
 
-    // Générer le token JWT pour la connexion
-    const jwtToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: "24h" }
-    );
-
-    // Créer la session
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
-
-    const session = new Session({
-      userId: user._id,
-      token: jwtToken,
-      expiresAt,
-      deviceInfo: "Email verification",
-    });
-
-    await session.save();
-    console.log(`[VERIFY-EMAIL] Session créée pour: ${user.email}`);
+    // NE PAS générer de token ici - l'utilisateur doit passer par login pour configurer 2FA
+    console.log(`[VERIFY-EMAIL] ✅ Email vérifié, redirection vers login pour configurer 2FA`);
 
     return res.json({
-      message: "Email vérifié avec succès !",
+      message: "Email vérifié avec succès ! Vous pouvez maintenant vous connecter.",
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
         emailVerified: user.emailVerified,
       },
-      token: jwtToken,
-      authenticated: true,
+      requiresLogin: true,
     });
   } catch (error) {
     console.error("[VERIFY-EMAIL] Erreur:", error);

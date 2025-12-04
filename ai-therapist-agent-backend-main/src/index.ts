@@ -29,20 +29,20 @@ if (!process.env.MONGODB_URI) {
 const app = express();
 
 // CORS Configuration
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
+const allowedOrigins: string[] = [
+  process.env.FRONTEND_URL || "",
   "http://localhost:3000",
   "http://localhost:3001"
-].filter(Boolean); // Remove undefined values
+].filter(url => url.length > 0); // Remove empty strings
 
 // Middleware
 app.use(helmet()); // Security headers
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+    if (allowedOrigins.some((allowed: string) => origin.startsWith(allowed))) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
