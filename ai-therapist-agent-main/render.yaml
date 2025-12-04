@@ -1,0 +1,14 @@
+services:
+  # Frontend Next.js App
+  - type: web
+    name: therapie-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      # Cette variable sera ajoutée manuellement dans le dashboard Render
+      # NEXT_PUBLIC_API_URL (URL du backend déployé)
