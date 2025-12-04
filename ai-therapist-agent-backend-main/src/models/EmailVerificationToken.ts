@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, models, model } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IEmailVerificationToken extends Document {
   userId: mongoose.Types.ObjectId;
@@ -33,6 +33,6 @@ const EmailVerificationTokenSchema = new Schema<IEmailVerificationToken>({
 // Index pour nettoyer automatiquement les tokens expirés
 EmailVerificationTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export const EmailVerificationToken = 
-  models.EmailVerificationToken || 
-  model<IEmailVerificationToken>("EmailVerificationToken", EmailVerificationTokenSchema);
+export const EmailVerificationToken: Model<IEmailVerificationToken> = 
+  mongoose.models.EmailVerificationToken || 
+  mongoose.model<IEmailVerificationToken>("EmailVerificationToken", EmailVerificationTokenSchema);
