@@ -1,0 +1,22 @@
+services:
+  # Backend API Service
+  - type: web
+    name: therapie-backend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Ces variables seront ajoutées manuellement dans le dashboard Render
+      # MONGODB_URI
+      # JWT_SECRET
+      # OPENAI_API_KEY
+      # INNGEST_EVENT_KEY
+      # INNGEST_SIGNING_KEY
+      # EMAIL_USER
+      # EMAIL_PASS
+      # FRONTEND_URL

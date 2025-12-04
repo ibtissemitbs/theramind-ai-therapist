@@ -1,8 +1,11 @@
+// Load environment variables FIRST before any imports
+import dotenv from "dotenv";
+dotenv.config({ path: '.env' });
+
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import dotenv from "dotenv";
 import { serve } from "inngest/express";
 import { errorHandler } from "./middleware/errorHandler";
 import { logger } from "./utils/logger";
@@ -16,9 +19,6 @@ import { connectDB } from "./utils/db";
 import { inngest } from "./inngest/client";
 import { functions as inngestFunctions } from "./inngest/functions";
 
-// Load environment variables
-dotenv.config({ path: '.env' });
-
 // Debug: log if MONGODB_URI is loaded
 if (!process.env.MONGODB_URI) {
   console.log("⚠️ MONGODB_URI not found after dotenv.config()");
@@ -28,10 +28,30 @@ if (!process.env.MONGODB_URI) {
 // Create Express app
 const app = express();
 
+// CORS Configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:3000",
+  "http://localhost:3001"
+].filter(Boolean); // Remove undefined values
+
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON bodies
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+})); // Enable CORS
+app.use(express.json({ limit: '10mb' })); // Parse JSON bodies with 10MB limit for images
+app.use(express.urlencoded({ limit: '10mb', extended: true })); // Parse URL-encoded bodies
 app.use(morgan("dev")); // HTTP request logger
 
 // Set up Inngest endpoint
