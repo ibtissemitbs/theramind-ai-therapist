@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { QrCode, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { useSession } from "@/lib/contexts/session-context";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 interface QRVerificationPageProps {}
 
 export default function QRVerificationPage() {
@@ -37,7 +39,7 @@ export default function QRVerificationPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3001/auth/verify-qr", {
+      const response = await fetch(`${API_URL}/auth/verify-qr`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ qrToken, totpCode }),
