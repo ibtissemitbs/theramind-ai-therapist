@@ -31,9 +31,12 @@ const app = express();
 // CORS Configuration
 const allowedOrigins: string[] = [
   process.env.FRONTEND_URL || "",
+  "https://theramind-frontend.onrender.com",
   "http://localhost:3000",
   "http://localhost:3001"
 ].filter(url => url.length > 0); // Remove empty strings
+
+console.log("🔒 CORS - Allowed origins:", allowedOrigins);
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -42,13 +45,21 @@ app.use(cors({
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
     
+    // Allow all onrender.com origins in production
+    if (origin.endsWith('.onrender.com')) {
+      return callback(null, true);
+    }
+    
     if (allowedOrigins.some((allowed: string) => origin.startsWith(allowed))) {
       callback(null, true);
     } else {
+      console.log("❌ CORS blocked origin:", origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 })); // Enable CORS
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies with 10MB limit for images
 app.use(express.urlencoded({ limit: '10mb', extended: true })); // Parse URL-encoded bodies
