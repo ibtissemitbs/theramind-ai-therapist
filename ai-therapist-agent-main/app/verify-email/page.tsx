@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -30,7 +32,7 @@ export default function VerifyEmailPage() {
     try {
       console.log("[VERIFY] Envoi de la requête avec token:", token.substring(0, 10) + "...");
       
-      const response = await fetch(`/api/auth/verify-email`, {
+      const response = await fetch(`${API_URL}/auth/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
@@ -77,7 +79,7 @@ export default function VerifyEmailPage() {
     setResending(true);
 
     try {
-      const response = await fetch(`/api/auth/resend-verification`, {
+      const response = await fetch(`${API_URL}/auth/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
