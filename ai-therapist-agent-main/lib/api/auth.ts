@@ -1,10 +1,12 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 export async function registerUser(
   name: string,
   email: string,
   password: string,
   gender?: string
 ) {
-  const res = await fetch("/api/auth/register", {
+  const res = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email, password, gender }),
@@ -17,7 +19,7 @@ export async function registerUser(
 }
 
 export async function loginUser(email: string, password: string) {
-  const res = await fetch("/api/auth/login", {
+  const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -30,7 +32,7 @@ export async function loginUser(email: string, password: string) {
 }
 
 export async function forgotPassword(email: string) {
-  const res = await fetch("/api/auth/forgot-password", {
+  const res = await fetch(`${API_URL}/auth/forgot-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
@@ -43,7 +45,7 @@ export async function forgotPassword(email: string) {
 }
 
 export async function resetPassword(token: string, newPassword: string) {
-  const res = await fetch("/api/auth/reset-password", {
+  const res = await fetch(`${API_URL}/auth/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, newPassword }),
