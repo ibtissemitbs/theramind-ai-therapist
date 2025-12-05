@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
     process.env.BACKEND_API_URL ||
-    "http://localhost:3001";
+    "https://theramind-backend.onrender.com";
   const token = req.headers.get("Authorization");
 
   if (!token) {
@@ -51,8 +52,9 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
     process.env.BACKEND_API_URL ||
-    "http://localhost:3001";
+    "https://theramind-backend.onrender.com";
   const token = req.headers.get("Authorization");
 
   if (!token) {

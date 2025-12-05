@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
     process.env.BACKEND_API_URL ||
-    "http://localhost:3001";
+    "https://theramind-backend.onrender.com";
 
   console.log("[RESET-PASSWORD API ROUTE] Calling backend:", `${API_URL}/auth/reset-password`);
 
