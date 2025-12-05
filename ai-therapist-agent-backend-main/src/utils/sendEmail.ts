@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import { Resend } from 'resend';
 
 interface EmailOptions {
   to: string;
@@ -6,54 +6,36 @@ interface EmailOptions {
   html: string;
 }
 
+// Initialiser Resend avec la clé API
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
-    // Vérifier que les credentials sont configurées
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error("❌ EMAIL_USER ou EMAIL_PASS non configuré dans .env");
-      throw new Error("Configuration email manquante. Veuillez configurer EMAIL_USER et EMAIL_PASS dans le fichier .env");
+    // Vérifier que la clé API est configurée
+    if (!process.env.RESEND_API_KEY) {
+      console.error("❌ RESEND_API_KEY non configuré dans les variables d'environnement");
+      throw new Error("Configuration email manquante. Veuillez configurer RESEND_API_KEY");
     }
 
-    if (process.env.EMAIL_USER === "votre-email@gmail.com" || process.env.EMAIL_PASS === "votre-mot-de-passe-application") {
-      console.error("❌ Credentials email par défaut détectées");
-      throw new Error("Veuillez remplacer EMAIL_USER et EMAIL_PASS par vos vraies credentials Gmail");
-    }
+    console.log("📧 Envoi d'email via Resend à:", to);
 
-    // Créer le transporteur
-    const transporter = nodemailer.createTransport({
-      service: "gmail", // ou "outlook", "yahoo", etc.
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Utilisez un mot de passe d'application
-      },
-    });
-
-    // Vérifier la connexion
-    console.log("🔄 Vérification de la connexion email...");
-    await transporter.verify();
-    console.log("✅ Connexion email établie");
-
-    // Envoyer l'email
-    const info = await transporter.sendMail({
-      from: `"Theramind Support" <${process.env.EMAIL_USER}>`,
-      to,
+    // Envoyer l'email via Resend
+    const { data, error } = await resend.emails.send({
+      from: 'Theramind <onboarding@resend.dev>', // Domaine gratuit de Resend
+      to: [to],
       subject,
       html,
     });
 
-    console.log("✅ Email envoyé:", info.messageId);
-    return { success: true, messageId: info.messageId };
+    if (error) {
+      console.error("❌ Erreur Resend:", error);
+      throw new Error(error.message);
+    }
+
+    console.log("✅ Email envoyé via Resend:", data?.id);
+    return { success: true, messageId: data?.id };
   } catch (error: any) {
     console.error("❌ Erreur envoi email:", error);
-    
-    // Messages d'erreur plus clairs
-    if (error.code === "EAUTH") {
-      console.error("❌ Authentification Gmail échouée. Vérifiez EMAIL_USER et EMAIL_PASS");
-      console.error("💡 Assurez-vous d'utiliser un mot de passe d'application : https://myaccount.google.com/apppasswords");
-    } else if (error.code === "ESOCKET") {
-      console.error("❌ Impossible de se connecter au serveur SMTP");
-    }
-    
     throw error;
   }
 }
