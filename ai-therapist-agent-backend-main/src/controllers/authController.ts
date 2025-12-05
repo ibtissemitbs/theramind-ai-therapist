@@ -59,26 +59,17 @@ export const register = async (req: Request, res: Response) => {
     await tokenDoc.save();
     console.log("[REGISTER] Token de vérification créé");
 
-    // Envoyer l'email de vérification
+    // Envoyer l'email de vérification (non bloquant)
     const verificationUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-email?token=${verificationToken}`;
     
-    try {
-      await sendEmail({
-        to: email,
-        subject: "Vérification de votre compte - Theramind",
-        html: getVerificationEmailTemplate(verificationUrl, user.name),
-      });
-      console.log("[REGISTER] Email de vérification envoyé");
-    } catch (emailError) {
-      console.error("[REGISTER] Erreur envoi email:", emailError);
-      // Supprimer l'utilisateur si l'email ne peut pas être envoyé
-      await User.findByIdAndDelete(user._id);
-      await EmailVerificationToken.deleteOne({ userId: user._id });
-      return res.status(500).json({
-        message: "Erreur lors de l'envoi de l'email de vérification. Veuillez réessayer.",
-        error: emailError instanceof Error ? emailError.message : "Erreur d'envoi d'email",
-      });
-    }
+    // Tentative d'envoi d'email en arrière-plan (ne bloque pas l'inscription)
+    sendEmail({
+      to: email,
+      subject: "Vérification de votre compte - Theramind",
+      html: getVerificationEmailTemplate(verificationUrl, user.name),
+    })
+      .then(() => console.log("[REGISTER] Email de vérification envoyé"))
+      .catch((emailError) => console.warn("[REGISTER] Erreur envoi email (non bloquant):", emailError.message));
     
     // Réponse : inscription réussie avec envoi d'email
     return res.status(201).json({
