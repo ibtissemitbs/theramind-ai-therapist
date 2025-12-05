@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,19 +14,79 @@ import {
   User, 
   Share2, 
   BookmarkPlus,
+  Bookmark,
+  Check,
   Phone,
   ExternalLink
 } from "lucide-react";
 import { getArticleBySlug, articles } from "@/lib/articles-data";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ArticlePage() {
   const params = useParams();
   const slug = params?.slug as string;
   const article = getArticleBySlug(slug);
+  const { toast } = useToast();
+  const [isSaved, setIsSaved] = useState(false);
 
   if (!article) {
     notFound();
   }
+
+  // Fonction pour partager l'article
+  const handleShare = async () => {
+    const shareData = {
+      title: article.title,
+      text: article.excerpt,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copier le lien
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Lien copié !",
+          description: "Le lien de l'article a été copié dans le presse-papier.",
+        });
+      }
+    } catch (error) {
+      console.error("Erreur partage:", error);
+    }
+  };
+
+  // Fonction pour sauvegarder l'article
+  const handleSave = () => {
+    const savedArticles = JSON.parse(localStorage.getItem("savedArticles") || "[]");
+    
+    if (isSaved) {
+      // Retirer de la liste
+      const filtered = savedArticles.filter((s: string) => s !== slug);
+      localStorage.setItem("savedArticles", JSON.stringify(filtered));
+      setIsSaved(false);
+      toast({
+        title: "Article retiré",
+        description: "L'article a été retiré de vos favoris.",
+      });
+    } else {
+      // Ajouter à la liste
+      savedArticles.push(slug);
+      localStorage.setItem("savedArticles", JSON.stringify(savedArticles));
+      setIsSaved(true);
+      toast({
+        title: "Article sauvegardé !",
+        description: "L'article a été ajouté à vos favoris.",
+      });
+    }
+  };
+
+  // Vérifier si l'article est déjà sauvegardé
+  useState(() => {
+    const savedArticles = JSON.parse(localStorage.getItem("savedArticles") || "[]");
+    setIsSaved(savedArticles.includes(slug));
+  });
 
   // Articles similaires (même catégorie)
   const relatedArticles = articles
@@ -100,13 +161,18 @@ export default function ArticlePage() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="flex gap-3 mb-8"
           >
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleShare}>
               <Share2 className="w-4 h-4" />
               Partager
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <BookmarkPlus className="w-4 h-4" />
-              Sauvegarder
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={`gap-2 ${isSaved ? 'bg-primary/10 border-primary' : ''}`}
+              onClick={handleSave}
+            >
+              {isSaved ? <Bookmark className="w-4 h-4 fill-current" /> : <BookmarkPlus className="w-4 h-4" />}
+              {isSaved ? 'Sauvegardé' : 'Sauvegarder'}
             </Button>
           </motion.div>
 
