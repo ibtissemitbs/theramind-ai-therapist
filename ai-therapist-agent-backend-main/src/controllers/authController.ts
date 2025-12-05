@@ -126,15 +126,17 @@ export const login = async (req: Request, res: Response) => {
         .json({ message: "E-mail ou mot de passe incorrect." });
     }
 
-    // Vérifier si l'email est vérifié
-    if (!user.emailVerified) {
-      console.log("[LOGIN] Email non vérifié");
-      return res.status(403).json({
-        message: "Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception.",
-        requiresEmailVerification: true,
-        email: user.email,
-      });
-    }
+    // TEMPORAIRE: Désactivation de la vérification email pour permettre les tests
+    // TODO: Réactiver quand un domaine sera vérifié sur Resend
+    // if (!user.emailVerified) {
+    //   console.log("[LOGIN] Email non vérifié");
+    //   return res.status(403).json({
+    //     message: "Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception.",
+    //     requiresEmailVerification: true,
+    //     email: user.email,
+    //   });
+    // }
+    console.log("[LOGIN] Vérification email désactivée temporairement");
 
     // Si l'utilisateur a déjà configuré le TOTP, afficher le QR code ET demander le code
     if (user.totpEnabled && user.totpSecret) {
