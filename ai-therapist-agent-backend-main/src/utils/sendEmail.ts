@@ -1,41 +1,45 @@
-import { Resend } from 'resend';
-
 interface EmailOptions {
   to: string;
   subject: string;
   html: string;
 }
 
-// Initialiser Resend avec la clé API
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
     // Vérifier que la clé API est configurée
-    if (!process.env.RESEND_API_KEY) {
-      console.error("❌ RESEND_API_KEY non configuré dans les variables d'environnement");
-      throw new Error("Configuration email manquante. Veuillez configurer RESEND_API_KEY");
+    if (!process.env.BREVO_API_KEY) {
+      console.error("❌ BREVO_API_KEY non configuré dans les variables d'environnement");
+      throw new Error("Configuration email manquante. Veuillez configurer BREVO_API_KEY");
     }
 
-    console.log("📧 Envoi d'email via Resend à:", to);
+    console.log("📧 Envoi d'email via Brevo à:", to);
 
-    // Envoyer l'email via Resend
-    const { data, error } = await resend.emails.send({
-      from: 'Theramind <onboarding@resend.dev>', // Domaine gratuit de Resend
-      to: [to],
-      subject,
-      html,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: "Theramind", email: "moussaibtissem44@gmail.com" },
+        to: [{ email: to }],
+        subject: subject,
+        htmlContent: html,
+      }),
     });
 
-    if (error) {
-      console.error("❌ Erreur Resend:", error);
-      throw new Error(error.message);
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("❌ Erreur Brevo:", result);
+      throw new Error(result.message || 'Erreur envoi email');
     }
 
-    console.log("✅ Email envoyé via Resend:", data?.id);
-    return { success: true, messageId: data?.id };
+    console.log("✅ Email envoyé via Brevo:", result.messageId);
+    return { success: true, messageId: result.messageId };
   } catch (error: any) {
-    console.error("❌ Erreur envoi email:", error);
+    console.error("❌ Erreur envoi email Brevo:", error);
     throw error;
   }
 }
