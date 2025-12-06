@@ -15,7 +15,6 @@ import moodRouter from "./routes/mood";
 import activityRouter from "./routes/activity";
 import crisisRouter from "./routes/crisis";
 import statusRouter from "./routes/status";
-import audioRouter from "./routes/audio";
 import { connectDB } from "./utils/db";
 import { inngest } from "./inngest/client";
 import { functions as inngestFunctions } from "./inngest/functions";
@@ -84,7 +83,6 @@ app.use("/chat", chatRouter);
 app.use("/api/mood", moodRouter);
 app.use("/api/activity", activityRouter);
 app.use("/api/crisis", crisisRouter);
-app.use("/api/audio", audioRouter);
 
 // Error handling middleware
 app.use(errorHandler);
