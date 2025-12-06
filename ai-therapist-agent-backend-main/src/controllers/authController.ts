@@ -136,6 +136,33 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    // ============================================
+    // MODE TEST : Connexion directe sans 2FA
+    // Décommenter le bloc ci-dessous pour réactiver le 2FA
+    // ============================================
+    console.log("[LOGIN] MODE TEST - Connexion directe sans 2FA");
+    const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+    const token = jwt.sign(
+      { userId: user._id, qrVerified: true },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      message: "Connexion réussie (Mode Test - 2FA désactivé)",
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        profileImage: user.profileImage,
+      },
+    });
+    // ============================================
+    // FIN MODE TEST
+    // ============================================
+
+    /*
     // Si l'utilisateur a déjà configuré le TOTP, afficher le QR code ET demander le code
     if (user.totpEnabled && user.totpSecret) {
       console.log("[LOGIN] TOTP déjà configuré, affichage du QR code existant");
@@ -214,6 +241,7 @@ export const login = async (req: Request, res: Response) => {
         email: user.email,
       },
     });
+    */
   } catch (error) {
     console.error("[LOGIN] Erreur serveur :", error);
     return res.status(500).json({

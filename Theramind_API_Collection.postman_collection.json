@@ -1,0 +1,462 @@
+{
+  "info": {
+    "name": "Theramind API",
+    "description": "Collection complète de l'API Theramind - Application de thérapie IA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://theramind-backend.onrender.com",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Vérifie que le serveur est en ligne"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Authentification",
+      "item": [
+        {
+          "name": "1. Inscription (Register)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123\",\n  \"gender\": \"homme\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Créer un nouveau compte utilisateur"
+          }
+        },
+        {
+          "name": "2. Connexion (Login)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}",
+                  "if (jsonData.qrToken) {",
+                  "    pm.collectionVariables.set('qrToken', jsonData.qrToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Connexion utilisateur - retourne un QR code pour 2FA"
+          }
+        },
+        {
+          "name": "3. Vérifier Code 2FA (TOTP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{qrToken}}\",\n  \"totpCode\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-qr",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-qr"]
+            },
+            "description": "Vérifier le code TOTP de l'authentification 2FA"
+          }
+        },
+        {
+          "name": "4. Vérifier Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"votre_token_de_verification\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-email"]
+            },
+            "description": "Vérifier l'adresse email avec le token reçu par email"
+          }
+        },
+        {
+          "name": "5. Mot de passe oublié",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Demander un email de réinitialisation de mot de passe"
+          }
+        },
+        {
+          "name": "6. Réinitialiser mot de passe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"token_de_reset\",\n  \"newPassword\": \"NewPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "description": "Réinitialiser le mot de passe avec le token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Chat IA (Thérapie)",
+      "item": [
+        {
+          "name": "1. Créer une session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.sessionId) {",
+                  "    pm.collectionVariables.set('sessionId', jsonData.sessionId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/chat/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat", "sessions"]
+            },
+            "description": "Créer une nouvelle session de chat avec l'IA thérapeute"
+          }
+        },
+        {
+          "name": "2. Envoyer un message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Bonjour, je me sens un peu stressé aujourd'hui. Pouvez-vous m'aider ?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat/sessions/{{sessionId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat", "sessions", "{{sessionId}}", "messages"]
+            },
+            "description": "Envoyer un message à l'IA thérapeute et recevoir une réponse"
+          }
+        },
+        {
+          "name": "3. Obtenir l'historique",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/chat/sessions/{{sessionId}}/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat", "sessions", "{{sessionId}}", "history"]
+            },
+            "description": "Récupérer l'historique des messages d'une session"
+          }
+        },
+        {
+          "name": "4. Lister toutes les sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/chat/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat", "sessions"]
+            },
+            "description": "Récupérer la liste de toutes les sessions de chat"
+          }
+        }
+      ]
+    },
+    {
+      "name": "😊 Suivi d'humeur (Mood)",
+      "item": [
+        {
+          "name": "1. Enregistrer humeur",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 75,\n  \"note\": \"Je me sens plutôt bien aujourd'hui, un peu fatigué mais positif.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mood",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mood"]
+            },
+            "description": "Enregistrer le niveau d'humeur (score 0-100)"
+          }
+        },
+        {
+          "name": "2. Obtenir historique humeur",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mood",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mood"]
+            },
+            "description": "Récupérer l'historique des humeurs enregistrées"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏃 Activités",
+      "item": [
+        {
+          "name": "1. Enregistrer activité",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"exercise\",\n  \"name\": \"Méditation\",\n  \"description\": \"Session de méditation guidée\",\n  \"duration\": 15\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/activity",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activity"]
+            },
+            "description": "Enregistrer une activité de bien-être"
+          }
+        },
+        {
+          "name": "2. Obtenir activités",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/activity",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activity"]
+            },
+            "description": "Récupérer la liste des activités"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚨 Alertes de crise",
+      "item": [
+        {
+          "name": "1. Créer alerte de crise",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_id\",\n  \"sessionId\": \"{{sessionId}}\",\n  \"level\": \"medium\",\n  \"message\": \"Détection de stress élevé\",\n  \"keywords\": [\"stress\", \"anxiété\"],\n  \"userMessage\": \"Je me sens très anxieux\",\n  \"resources\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crisis",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crisis"]
+            },
+            "description": "Créer une alerte de crise (détection automatique)"
+          }
+        },
+        {
+          "name": "2. Obtenir alertes utilisateur",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/crisis/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crisis", "user", "{{userId}}"]
+            },
+            "description": "Récupérer les alertes de crise d'un utilisateur"
+          }
+        }
+      ]
+    }
+  ]
+}
