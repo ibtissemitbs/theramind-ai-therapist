@@ -2,6 +2,10 @@
 
 Application de thérapie assistée par IA avec système de chat, suivi d'humeur, activités thérapeutiques et détection de crises.
 
+## 🔗 Live Demo
+
+Accédez à la Live Demo  : [https://theramind-frontend.onrender.com/](https://theramind-frontend.onrender.com/)
+
 ## 🏗️ Architecture
 
 Le projet est composé de deux parties principales :
